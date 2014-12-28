@@ -1,0 +1,26 @@
+{
+  "name": "applebolivia",
+  "version": "0.0.0",
+  "homepage": "https://github.com/chitopolo/applebo",
+  "authors": [
+    "Rene Polo <renejpolo@me.com>"
+  ],
+  "description": "Apple Bolivia vende y compra",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "latest",
+    "font-awesome": "latest",
+    "animate.css": "latest",
+    "angular": "latest",
+    "angular-route": "latest",
+    "angular-strap": "~2.1.5",
+    "angular-motion": "~0.3.4"
+  }
+}

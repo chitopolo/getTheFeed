@@ -1,0 +1,35 @@
+{
+  "name": "applebolivia",
+  "version": "1.0.0",
+  "description": "AppleBolivia Comprar y Vender",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chitopolo/applebo.git"
+  },
+  "author": "Rene Polo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chitopolo/applebo/issues"
+  },
+  "homepage": "https://github.com/chitopolo/applebo",
+  "dependencies": {
+    "async": "^0.9.0",
+    "bcryptjs": "^2.1.0",
+    "bluebird": "^2.4.2",
+    "body-parser": "^1.10.0",
+    "express": "^4.10.6",
+    "fbgraph": "^0.3.0",
+    "moment": "^2.8.4",
+    "mongoose": "^3.8.21",
+    "morgan": "^1.5.0",
+    "path": "^0.4.9",
+    "querystring": "^0.2.0",
+    "request": "^2.51.0",
+    "underscore": "^1.7.0"
+  }
+}

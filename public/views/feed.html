@@ -1,0 +1,24 @@
+<h1>Feed</h1>
+ <input ng-model="search.message" class="form-control">
+
+<div class="row-fluid">
+<div ng-repeat=" post in feed | filter:search">
+  <div class="col-sm-6 col-md-2">
+    <div class="thumbnail">
+      <img src="{{post.picture}}" >
+      <div class="caption">
+        <h3>{{post.from.name}}</h3>
+        <p> {{post.message}}</p>
+       <p><a href="{{post.actions[0].link}}" class="btn btn-default" role="button">Ver</a></p>
+       <div class="btn btn-primary" ng-if="{{post.likes}}">{{post.likes.data.length}}</div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+</div>
+</div>
+<div ng-click="getthefeed()" class="btn btn-primary">getit</div>
