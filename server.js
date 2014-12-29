@@ -15,12 +15,20 @@ var moment = require('moment');
 var logger = require('morgan');
 var request = require('request');
 var Parse = require('node-parse-api').Parse;
+var Kaiseki = require('kaiseki');
+
+
 
 //parse
-var APP_ID = "vcfeVvTehZWbpylpqaJvbUOSFNO0lEBHlWjiW7iq";
-var MASTER_KEY = "wOCjtCaI1mAh5lIyjQabGcq4O3jcjagF5HXWKDIo";
+
+var APP_ID = 'vcfeVvTehZWbpylpqaJvbUOSFNO0lEBHlWjiW7iq';
+var REST_API_KEY = 'IXVRwkbl2QvPtikOhlMoalW2xgWlH6hGm9dMaXAK';
+var appdata = new Kaiseki(APP_ID, REST_API_KEY);
+
+// var APP_ID = "vcfeVvTehZWbpylpqaJvbUOSFNO0lEBHlWjiW7iq";
+// var MASTER_KEY = "wOCjtCaI1mAh5lIyjQabGcq4O3jcjagF5HXWKDIo";
 //parse
-var appdata = new Parse(APP_ID, MASTER_KEY);
+// var appdata = new Parse(APP_ID, MASTER_KEY);
 
 var conf = {
     client_id:      '749963285077786'
@@ -131,10 +139,16 @@ app.get('/api/me', ensureAuthenticated, function(req, res) {
   //   res.send(user);
   // });
 
-  appdata.find('User', req.user, function (err, user) {
-    // console.log(response);
+  // appdata.getObjects('User', 'User', req.user, function (err, user) {
+  //   // console.log(response);
+  //   res.send(user)
+  // });
+
+  appdata.getObjects('User', req.user, function(err, user, body, success) {
+    console.log('user info = ', body);
     res.send(user)
   });
+
 
 
 });
@@ -146,14 +160,16 @@ app.get('/api/me', ensureAuthenticated, function(req, res) {
  */
 app.put('/api/me', ensureAuthenticated, function(req, res) {
   
-  appdata.find('User', req.user, function (err, user) {
+  // appdata.find('User', req.user, function (err, user) {
+  appdata.getObjects('User', req.user, function(err, user, body, success) {
     if (!user) {
           return res.status(400).send({ message: 'User not found' });
         }
     user.displayName = req.body.displayName || user.displayName;
     user.email = req.body.email || user.email;
     
-    appdata.insert('User', user, function (err, response) {
+    appdata.createObject('User', user, function(err, response, body, success) {
+     console.log('response 3b: ', response);
       if(!err){
         console.log(response);
         res.status(200).end();
@@ -161,6 +177,16 @@ app.put('/api/me', ensureAuthenticated, function(req, res) {
         console.log('error '+ err);
       }
     });
+    
+    // appdata.insertCustom('users', user, function(err, response) {
+    //   console.log('response 3b: ', response);
+    //   if(!err){
+    //     console.log(response);
+    //     res.status(200).end();
+    //   }else{
+    //     console.log('error '+ err);
+    //   }
+    // });
 
     // user.save(function(err) {
     //   res.status(200).end();
@@ -214,23 +240,28 @@ app.post('/auth/facebook', function(req, res) {
         return res.status(500).send({ message: profile.error.message });
       }
       console.log('profile: ', profile);
-
+      // console.log('req.headers.authorization : ' , req.headers);
 
       if (req.headers.authorization) {
-        
-        appdata.find('User', { facebook: profile.id }, function (err, existingUser) {
+        console.log('inside of the req.headers.authorization');
+        appdata.getObjects('User', { facebook: profile.id }, function(err, existingUser, body, success) {
+        // appdata.find('User', { facebook: profile.id }, function (err, existingUser) {
           if (existingUser) {
             return res.status(409).send({ message: 'There is already a Facebook account that belongs to you' });
           }
           var token = req.headers.authorization.split(' ')[1];
           var payload = jwt.decode(token, config.TOKEN_SECRET);
-          appdata.find('User', payload.sub, function (err, user) {
+          // appdata.find('User', payload.sub, function (err, user) {
+            console.log('this is the payload ', payload);
+          appdata.getObjects('User', payload.sub, function(err, user, body, success) {
+           
             if (!user) {
                          return res.status(400).send({ message: 'User not found' });
                        }
                        user.facebook = profile.id;
                        user.displayName = user.displayName || profile.name;
-                       appdata.insert('User', user, function (err, response) {
+                       appdata.createObject('User', user, function(err, response, body, success) {
+                        console.log('response 3b: ', response);
                          if(!err){
                            var token = createToken(user);
                          res.send({ token: token, fbtoken: accessToken.access_token });
@@ -247,16 +278,26 @@ app.post('/auth/facebook', function(req, res) {
         });
         } else {
           // Step 3b. Create a new user account or return an existing one.
-         appdata.find('User', { facebook: profile.id }, function (err, existingUser) {
-           if (existingUser) {
+         console.log('inside of the else');
+         var params = { 
+          facebook: profile.id 
+         }
+
+         appdata.getObjects('User', params, function(err, resp, existingUser, success) {
+         // appdata.find('User', { facebook: profile.id }, function (err, existingUser) {
+          console.log('existing USER success: ', success, ' body: ', existingUser);
+           if (existingUser.length === 1) {
                          var token = createToken(existingUser);
                          return res.send({ token: token , fbtoken: accessToken.access_token});
                        }
                        var user = {};
                        user.facebook = profile.id;
                        user.displayName = profile.name;
+                       console.log('user being created: ', user);
+                       // appdata.insertCustom('users', user, function(err, response) {
+                       appdata.createObject('User', user, function(err, response, body, success) {
                        
-                       appdata.insert('User', user, function (err, response) {
+                        // console.log('response 3b: ', response);
                          if(!err){
                            var token = createToken(user);
                            res.send({ token: token , fbtoken: accessToken.access_token});
