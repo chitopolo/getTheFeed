@@ -1,5 +1,5 @@
 var express = require('express');
-var mongoose = require('mongoose');
+// var mongoose = require('mongoose');
 var Promise = require("bluebird");
 var _ = require('underscore');
 var graph     = Promise.promisifyAll(require('fbgraph')); // con promise
@@ -14,9 +14,13 @@ var jwt = require('jwt-simple');
 var moment = require('moment');
 var logger = require('morgan');
 var request = require('request');
+var Parse = require('node-parse-api').Parse;
 
-
-
+//parse
+var APP_ID = "vcfeVvTehZWbpylpqaJvbUOSFNO0lEBHlWjiW7iq";
+var MASTER_KEY = "wOCjtCaI1mAh5lIyjQabGcq4O3jcjagF5HXWKDIo";
+//parse
+var appdata = new Parse(APP_ID, MASTER_KEY);
 
 var conf = {
     client_id:      '749963285077786'
@@ -26,42 +30,42 @@ var conf = {
 };
 
 
-var userSchema = new mongoose.Schema({
-  email: { type: String, unique: true, lowercase: true },
-  password: { type: String, select: false },
-  displayName: String,
-  facebook: String,
-  foursquare: String,
-  google: String,
-  github: String,
-  linkedin: String,
-  live: String,
-  yahoo: String,
-  twitter: String
-});
+// var userSchema = new mongoose.Schema({
+//   email: { type: String, unique: true, lowercase: true },
+//   password: { type: String, select: false },
+//   displayName: String,
+//   facebook: String,
+//   foursquare: String,
+//   google: String,
+//   github: String,
+//   linkedin: String,
+//   live: String,
+//   yahoo: String,
+//   twitter: String
+// });
 
-userSchema.pre('save', function(next) {
-  var user = this;
-  if (!user.isModified('password')) {
-    return next();
-  }
-  bcrypt.genSalt(10, function(err, salt) {
-    bcrypt.hash(user.password, salt, function(err, hash) {
-      user.password = hash;
-      next();
-    });
-  });
-});
+// userSchema.pre('save', function(next) {
+//   var user = this;
+//   if (!user.isModified('password')) {
+//     return next();
+//   }
+//   bcrypt.genSalt(10, function(err, salt) {
+//     bcrypt.hash(user.password, salt, function(err, hash) {
+//       user.password = hash;
+//       next();
+//     });
+//   });
+// });
 
-userSchema.methods.comparePassword = function(password, done) {
-  bcrypt.compare(password, this.password, function(err, isMatch) {
-    done(err, isMatch);
-  });
-};
+// userSchema.methods.comparePassword = function(password, done) {
+//   bcrypt.compare(password, this.password, function(err, isMatch) {
+//     done(err, isMatch);
+//   });
+// };
 
-var User = mongoose.model('User', userSchema);
+// var User = mongoose.model('User', userSchema);
 
-mongoose.connect(config.MONGO_URI);
+// mongoose.connect(config.MONGO_URI);
 
 var app = express();
 
@@ -121,9 +125,18 @@ function createToken(user) {
  |--------------------------------------------------------------------------
  */
 app.get('/api/me', ensureAuthenticated, function(req, res) {
-  User.findById(req.user, function(err, user) {
-    res.send(user);
+  
+
+  // User.findById(req.user, function(err, user) {
+  //   res.send(user);
+  // });
+
+  appdata.find('User', req.user, function (err, user) {
+    // console.log(response);
+    res.send(user)
   });
+
+
 });
 
 /*
@@ -132,16 +145,43 @@ app.get('/api/me', ensureAuthenticated, function(req, res) {
  |--------------------------------------------------------------------------
  */
 app.put('/api/me', ensureAuthenticated, function(req, res) {
-  User.findById(req.user, function(err, user) {
+  
+  appdata.find('User', req.user, function (err, user) {
     if (!user) {
-      return res.status(400).send({ message: 'User not found' });
-    }
+          return res.status(400).send({ message: 'User not found' });
+        }
     user.displayName = req.body.displayName || user.displayName;
     user.email = req.body.email || user.email;
-    user.save(function(err) {
-      res.status(200).end();
+    
+    appdata.insert('User', user, function (err, response) {
+      if(!err){
+        console.log(response);
+        res.status(200).end();
+      }else{
+        console.log('error '+ err);
+      }
     });
+
+    // user.save(function(err) {
+    //   res.status(200).end();
+    // });
+
+
+
   });
+
+
+
+  // User.findById(req.user, function(err, user) {
+  //   if (!user) {
+  //     return res.status(400).send({ message: 'User not found' });
+  //   }
+  //   user.displayName = req.body.displayName || user.displayName;
+  //   user.email = req.body.email || user.email;
+  //   user.save(function(err) {
+  //     res.status(200).end();
+  //   });
+  // });
 });
 
 /*
@@ -177,43 +217,116 @@ app.post('/auth/facebook', function(req, res) {
 
 
       if (req.headers.authorization) {
-        User.findOne({ facebook: profile.id }, function(err, existingUser) {
+        
+        appdata.find('User', { facebook: profile.id }, function (err, existingUser) {
           if (existingUser) {
             return res.status(409).send({ message: 'There is already a Facebook account that belongs to you' });
           }
           var token = req.headers.authorization.split(' ')[1];
           var payload = jwt.decode(token, config.TOKEN_SECRET);
-          User.findById(payload.sub, function(err, user) {
+          appdata.find('User', payload.sub, function (err, user) {
             if (!user) {
-              return res.status(400).send({ message: 'User not found' });
-            }
-            user.facebook = profile.id;
-            user.displayName = user.displayName || profile.name;
-            user.save(function() {
-              var token = createToken(user);
-              res.send({ token: token, fbtoken: accessToken.access_token });
-            });
+                         return res.status(400).send({ message: 'User not found' });
+                       }
+                       user.facebook = profile.id;
+                       user.displayName = user.displayName || profile.name;
+                       appdata.insert('User', user, function (err, response) {
+                         if(!err){
+                           var token = createToken(user);
+                         res.send({ token: token, fbtoken: accessToken.access_token });
+                         }else{
+                           console.log('error '+ err);
+                         }
+                       });
+
+                       // user.save(function() {
+                       //   var token = createToken(user);
+                       //   res.send({ token: token, fbtoken: accessToken.access_token });
+                       // });
           });
         });
-      } else {
-        // Step 3b. Create a new user account or return an existing one.
-        User.findOne({ facebook: profile.id }, function(err, existingUser) {
-          if (existingUser) {
-            var token = createToken(existingUser);
-            return res.send({ token: token , fbtoken: accessToken.access_token});
-          }
-          var user = new User();
-          user.facebook = profile.id;
-          user.displayName = profile.name;
-          user.save(function() {
-            var token = createToken(user);
-            res.send({ token: token , fbtoken: accessToken.access_token});
-          });
+        } else {
+          // Step 3b. Create a new user account or return an existing one.
+         appdata.find('User', { facebook: profile.id }, function (err, existingUser) {
+           if (existingUser) {
+                         var token = createToken(existingUser);
+                         return res.send({ token: token , fbtoken: accessToken.access_token});
+                       }
+                       var user = {};
+                       user.facebook = profile.id;
+                       user.displayName = profile.name;
+                       
+                       appdata.insert('User', user, function (err, response) {
+                         if(!err){
+                           var token = createToken(user);
+                           res.send({ token: token , fbtoken: accessToken.access_token});
+                         }else{
+                           console.log('error '+ err);
+                         }
+                       });
+
+            //            user.save(function() {
+            //              var token = createToken(user);
+            //              res.send({ token: token , fbtoken: accessToken.access_token});
+            // });
+         });
+
+          // User.findOne({ facebook: profile.id }, function(err, existingUser) {
+          //   if (existingUser) {
+          //     var token = createToken(existingUser);
+          //     return res.send({ token: token , fbtoken: accessToken.access_token});
+          //   }
+          //   var user = new User();
+          //   user.facebook = profile.id;
+          //   user.displayName = profile.name;
+          //   user.save(function() {
+          //     var token = createToken(user);
+          //     res.send({ token: token , fbtoken: accessToken.access_token});
+          //   });
+          // });
+        }
         });
-      }
-    });
   });
 });
+
+
+//         User.findOne({ facebook: profile.id }, function(err, existingUser) {
+//           if (existingUser) {
+//             return res.status(409).send({ message: 'There is already a Facebook account that belongs to you' });
+//           }
+//           var token = req.headers.authorization.split(' ')[1];
+//           var payload = jwt.decode(token, config.TOKEN_SECRET);
+//           User.findById(payload.sub, function(err, user) {
+//             if (!user) {
+//               return res.status(400).send({ message: 'User not found' });
+//             }
+//             user.facebook = profile.id;
+//             user.displayName = user.displayName || profile.name;
+//             user.save(function() {
+//               var token = createToken(user);
+//               res.send({ token: token, fbtoken: accessToken.access_token });
+//             });
+//           });
+//         });
+//       } else {
+//         // Step 3b. Create a new user account or return an existing one.
+//         User.findOne({ facebook: profile.id }, function(err, existingUser) {
+//           if (existingUser) {
+//             var token = createToken(existingUser);
+//             return res.send({ token: token , fbtoken: accessToken.access_token});
+//           }
+//           var user = new User();
+//           user.facebook = profile.id;
+//           user.displayName = profile.name;
+//           user.save(function() {
+//             var token = createToken(user);
+//             res.send({ token: token , fbtoken: accessToken.access_token});
+//           });
+//         });
+//       }
+//     });
+//   });
+// });
 
 
 

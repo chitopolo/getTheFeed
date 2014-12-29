@@ -4,7 +4,7 @@
   "description": "AppleBolivia Comprar y Vender",
   "main": "server.js",
   "scripts": {
-     "test": "./node_modules/karma/bin/karma start --single-run --browsers PhantomJS",
+    "test": "./node_modules/karma/bin/karma start --single-run --browsers PhantomJS",
     "start": "node server.js"
   },
   "repository": {
@@ -28,6 +28,7 @@
     "moment": "^2.8.4",
     "mongoose": "^3.8.21",
     "morgan": "^1.5.0",
+    "node-parse-api": "^0.3.2",
     "path": "^0.4.9",
     "querystring": "^0.2.0",
     "request": "^2.51.0",
@@ -40,6 +41,5 @@
     "karma-jasmine": "^0.3.3",
     "karma-safari-launcher": "^0.1.1",
     "karma-phantomjs-launcher": "^0.1.4"
-
   }
 }
