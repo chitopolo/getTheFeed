@@ -75,12 +75,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-// if (app.get('env') === 'production') {
-//   app.use(function(req, res, next) {
-//     var protocol = req.get('x-forwarded-proto');
-//     protocol == 'https' ? next() : res.redirect('https://' + req.hostname + req.url);
-//   });
-// }
+if (app.get('env') === 'production') {
+  app.use(function(req, res, next) {
+    var protocol = req.get('x-forwarded-proto');
+    protocol == 'http' ? next() : res.redirect('http://' + req.hostname + req.url);
+  });
+}
 
 // app.use(express.static(__dirname + '/public')); 
 app.use(express.static(path.join(__dirname, '/public')));
