@@ -5,14 +5,12 @@ angular.module('applebo.feed', ['ngCookies'])
 
    $scope.token =  $cookieStore.get('token');
 
-   $scope.getthefeed = function(){
-       console.log('getting the feed');
+  
        Feed.get($cookieStore.get('token'))
        .then(function(data){
         console.log('esto habia en el feed :', data);
         $scope.feed = data.data;
        });
-   };
 
 
 
