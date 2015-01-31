@@ -1,0 +1,19 @@
+body { 
+  background: url(../img/sfbackground.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+.welcome{
+    padding-top:10%;
+}
+
+.everyItem{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: white;
+}

@@ -10,6 +10,8 @@ var AppleBo = angular.module('applebo',
         'applebo.feed'
     ])
     .config(function($stateProvider, $urlRouterProvider, $authProvider) {
+            $urlRouterProvider.otherwise('/home');
+
             $stateProvider
                 .state('login', {
                     url: '/login',
@@ -19,7 +21,7 @@ var AppleBo = angular.module('applebo',
                 .state('home', {
                     url: '/home',
                     templateUrl: 'views/home.html',
-                    controller: ''
+                    controller: 'LoginCtrl'
                 })
                 
                 .state('logout', {

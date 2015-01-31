@@ -1,6 +1,6 @@
 angular.module('applebo.login',  ['ngCookies'])
 
-.controller('LoginCtrl', function($scope, $cookieStore, $alert, Auth, $auth) {
+.controller('LoginCtrl', function($scope, $cookieStore, $alert, Auth, $auth, $state) {
   angular.extend($scope, Auth);
      
      $scope.currentUser;
@@ -18,6 +18,7 @@ angular.module('applebo.login',  ['ngCookies'])
               });
                console.log('response: ' , response.data.fbtoken);
               $cookieStore.put('token', response.data.fbtoken);
+              $state.go('feed');
             })
             .catch(function(response) {
               $alert({
