@@ -21,6 +21,8 @@ angular.module('applebo.login',  ['ngCookies'])
               $state.go('feed');
             })
             .catch(function(response) {
+             console.log('Esta es la respuesta: ', response);
+
               $alert({
                 content: response.data.message,
                 animation: 'fadeZoomFadeDown',

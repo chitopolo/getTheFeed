@@ -76,7 +76,7 @@
     */
     app.get('/api/me', ensureAuthenticated, function(req, res) {
 
-      appdata.getObjects('User', req.user, function(err, user, body, success) {
+      appdata.getObject('User', req.user, function(err, user, body, success) {
         console.log('user info = ', body);
         res.send(user)
       });
@@ -90,7 +90,7 @@
     app.put('/api/me', ensureAuthenticated, function(req, res) {
 
     // appdata.find('User', req.user, function (err, user) {
-      appdata.getObjects('User', req.user, function(err, user, body, success) {
+      appdata.getObject('User', req.user, function(err, user, body, success) {
         if (!user) {
           return res.status(400).send({ message: 'User not found' });
         }
@@ -131,37 +131,43 @@
         return res.status(500).send({ message: accessToken.error.message });
       }
       accessToken = qs.parse(accessToken);
-      console.log('this is the access Token: ', accessToken)
+      console.log('got the access token')
 
     // Step 2. Retrieve profile information about the current user.
     request.get({ url: graphApiUrl, qs: accessToken, json: true }, function(err, response, profile) {
       if (response.statusCode !== 200) {
         return res.status(500).send({ message: profile.error.message });
       }
-      console.log('profile: ', profile);
+      console.log('got the profile data');
+      // console.log('profile: ', profile);
     // console.log('req.headers.authorization : ' , req.headers);
 
     if(req.headers.authorization) {
       console.log('inside of the req.headers.authorization');
-      appdata.getObjects('User', { facebook: profile.id }, function(err, existingUser, body, success) {
+      appdata.getObject('User', { facebook: profile.id }, function(err, existingUser, body, success) {
     // appdata.find('User', { facebook: profile.id }, function (err, existingUser) {
       if (existingUser) {
         return res.status(409).send({ message: 'There is already a Facebook account that belongs to you' });
       }
+
+      console.log('user didnt exist yet');
       var token = req.headers.authorization.split(' ')[1];
       var payload = jwt.decode(token, config.TOKEN_SECRET);
     // appdata.find('User', payload.sub, function (err, user) {
       console.log('this is the payload ', payload);
-      appdata.getObjects('User', payload.sub, function(err, user, body, success) {
+      appdata.getObject('User', payload.sub, function(err, user, body, success) {
 
         if (!user) {
+          console.log('user not found');
           return res.status(400).send({ message: 'User not found' });
         }
         user.facebook = profile.id;
         user.displayName = user.displayName || profile.name;
         user.email = profile.email || '';
-        user.location = profile.location.name || '';
+        user.city = profile.location || '';
         user.bio = profile.bio || '';
+
+        console.log('Complete user object to save: ', user);
         console.log('This is the FB payload: ', profile);
         appdata.createObject('User', user, function(err, response, body, success) {
           console.log('response 3b: ', response);
@@ -177,10 +183,13 @@
   } else {
     // Step 3b. Create a new user account or return an existing one.
     console.log('inside of the else');
-    var params = { 
-      facebook: profile.id 
-    }
-    appdata.getObjects('User', params, function(err, resp, existingUser, success) {
+    var params = {
+      where: { facebook: profile.id }    
+    };
+   
+    console.log('the params: ', params);
+    console.log('creting new account or return an existing one');
+    appdata.getObject('User','facebook', params, function(err, resp, existingUser, success) {
     // appdata.find('User', { facebook: profile.id }, function (err, existingUser) {
       console.log('existing USER success: ', success, ' body: ', existingUser);
       if (existingUser.length === 1) {
@@ -191,13 +200,16 @@
       user.facebook = profile.id;
       user.displayName = profile.name;
       user.email = profile.email || '';
-      user.location = profile.location || '';
+      if(profile.location !== undefined){
+        user.city = profile.location.name || '';
+      }
       user.bio = profile.bio || '';
-      console.log('user being created: ', user);
+      console.log('user to create: ', user);
     // appdata.insertCustom('users', user, function(err, response) {
       appdata.createObject('User', user, function(err, response, body, success) {
-        // console.log('response 3b: ', response);
+         console.log('response 3b: ', body);
         if(!err){
+          console.log('no error found');
           var token = createToken(user);
           res.send({ token: token , fbtoken: accessToken.access_token});
         }else{
