@@ -19,10 +19,10 @@
       <div class="col-md-8">
         <h3>{{post.from.name}}</h3>
         <p> {{post.message}}</p>
-       <div class="btn btn-primary" ng-if="{{post.likes}}">{{post.likes.data.length}}</div>
+       <div class="btn btn-primary" ng-if="post.likes">{{post.likes.data.length}}</div>
       </div>
       <div class="col-md-3">
-        <img ng-src="{{post.picture}}" class="img-rounded img-responsive">
+        <img ng-src="post.picture" class="img-rounded img-responsive">
        </div>
        
        <div class="col-md-1">

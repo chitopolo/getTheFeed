@@ -75,8 +75,8 @@
     |--------------------------------------------------------------------------
     */
     app.get('/api/me', ensureAuthenticated, function(req, res) {
-
-      appdata.getObject('User', req.user, function(err, user, body, success) {
+      
+      appdata.getObjects('User', req.user, function(err, user, body, success) {
         console.log('user info = ', body);
         res.send(user)
       });
@@ -90,7 +90,7 @@
     app.put('/api/me', ensureAuthenticated, function(req, res) {
 
     // appdata.find('User', req.user, function (err, user) {
-      appdata.getObject('User', req.user, function(err, user, body, success) {
+      appdata.getObjects('User', req.user, function(err, user, body, success) {
         if (!user) {
           return res.status(400).send({ message: 'User not found' });
         }
@@ -144,7 +144,10 @@
 
     if(req.headers.authorization) {
       console.log('inside of the req.headers.authorization');
-      appdata.getObject('User', { facebook: profile.id }, function(err, existingUser, body, success) {
+      var params = {
+        where: { facebook: profile.id }    
+      };
+      appdata.getObjects('User', params, function(err, existingUser, body, success) {
     // appdata.find('User', { facebook: profile.id }, function (err, existingUser) {
       if (existingUser) {
         return res.status(409).send({ message: 'There is already a Facebook account that belongs to you' });
@@ -155,7 +158,7 @@
       var payload = jwt.decode(token, config.TOKEN_SECRET);
     // appdata.find('User', payload.sub, function (err, user) {
       console.log('this is the payload ', payload);
-      appdata.getObject('User', payload.sub, function(err, user, body, success) {
+      appdata.getObjects('User', payload.sub, function(err, user, body, success) {
 
         if (!user) {
           console.log('user not found');
@@ -189,7 +192,7 @@
    
     console.log('the params: ', params);
     console.log('creting new account or return an existing one');
-    appdata.getObject('User','facebook', params, function(err, resp, existingUser, success) {
+    appdata.getObjects('User', params, function(err, resp, existingUser, success) {
     // appdata.find('User', { facebook: profile.id }, function (err, existingUser) {
       console.log('existing USER success: ', success, ' body: ', existingUser);
       if (existingUser.length === 1) {
