@@ -1,6 +1,13 @@
-<div class="container welcome">
+<div class="container welcome" ng-controller="NavbarCtrl" >
+
+ <div ng-if="!isAuthenticated()">
     <h2>Bienvenidos a Apple Bolivia (Certified) <small>Por favor inicia sesión con facebook</small> </h2>
+    <div ng-click="authenticate('facebook')" class="btn btn-primary">Iniciar sesión Facebook</div>
+       
+    </div>
+    <div ng-if="isAuthenticated()" class="nav navbar-nav">
+    <h2>Bienvenidos a Apple Bolivia (Certified)  </h2>
 
-<div ng-click="authenticate('facebook')" class="btn btn-primary">Iniciar sesión Facebook</div>
-
+       <div><a ui-sref="feed" class="btn btn-primary">Ingresar</a></div>
+   </div>
 </div>

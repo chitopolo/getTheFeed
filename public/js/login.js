@@ -30,10 +30,7 @@ angular.module('applebo.login',  ['ngCookies'])
                 duration: 3
               });
             });
-        };
-
-
-   
+        }; 
 })
   .factory('Auth', function ($q, $http) {
     var getTokenFromFb = function(){
