@@ -4,12 +4,14 @@ angular.module('applebo.feed', ['ngCookies'])
    $scope.feed;
 
    $scope.token =  $cookieStore.get('token');
-
+   $scope.loadingmessage = 'Cargando...';
   
        Feed.get($cookieStore.get('token'))
        .then(function(data){
         console.log('esto habia en el feed :', data);
         $scope.feed = data.data;
+        $scope.loadingmessage = '';
+
        });
 
 

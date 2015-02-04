@@ -238,7 +238,7 @@
         graph.getAsync(theData, _theToken)
     .then(function(res){
     console.log('llego dentro del then');
-    if(count<5){
+    if(count<10){
        count++;
       // console.log('OTRO DATA SET ----------------------------- ' , res.data);
       theResult.push(res.data);
@@ -253,7 +253,7 @@
     // eventEmitter.emit('pageLoaded', res2, results);
     // console.log(results)
     console.log('EL COUNT FUE DE ' + count);
-    if(count === 5){
+    if(count === 10){
     // res2.render('feed', { res: _.flatten(results) });
     res2.json(_.flatten(results))
     }

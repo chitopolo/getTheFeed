@@ -11,7 +11,7 @@
 </div> 
 
 <div class="container">
-  <div ng-if="feed.length < 1"> Cargando...</div>
+  <h2> {{loadingmessage}} </h2>
 <div ng-repeat=" post in feed | filter:search">
   <div class="col-sm-12 col-md-12 ">
     <div class="col-md-12 everyItem">
