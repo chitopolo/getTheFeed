@@ -23,7 +23,7 @@
     var conf = {
       client_id:      '749963285077786'
       , client_secret:  '82bade0323a95e982e90805ba8c698dc'
-      , scope:          'email, user_about_me, user_birthday, user_location, publish_stream, user_groups'
+      , scope:          'email, user_about_me, user_birthday, user_location, user_groups'
       , redirect_uri:   'http://localhost:3000/auth/facebook'
     };
 
@@ -160,30 +160,30 @@
       console.log('this is the payload ', payload);
       appdata.getObjects('User', payload.sub, function(err, user, body, success) {
 
-        if (!user) {
-          console.log('user not found');
-          return res.status(400).send({ message: 'User not found' });
-        }
-        user.facebook = profile.id;
-        user.displayName = user.displayName || profile.name;
-        user.email = profile.email || '';
-        user.city = profile.location || '';
-        user.bio = profile.bio || '';
+                  if (!user) {
+                    console.log('user not found');
+                    return res.status(400).send({ message: 'User not found' });
+                  }
+                  user.facebook = profile.id;
+                  user.displayName = user.displayName || profile.name;
+                  user.email = profile.email || '';
+                  user.city = profile.location || '';
+                  user.bio = profile.bio || '';
 
-        console.log('Complete user object to save: ', user);
-        console.log('This is the FB payload: ', profile);
-        appdata.createObject('User', user, function(err, response, body, success) {
-          console.log('response 3b: ', response);
-          if(!err){
-            var token = createToken(user);
-            res.send({ token: token, fbtoken: accessToken.access_token });
-          }else{
-            console.log('error '+ err);
-          }
-        });
-      });
-    });
-  } else {
+                  console.log('Complete user object to save: ', user);
+                  console.log('This is the FB payload: ', profile);
+                  appdata.createObject('User', user, function(err, response, body, success) {
+                    console.log('response 3b: ', response);
+                    if(!err){
+                      var token = createToken(user);
+                      res.send({ token: token, fbtoken: accessToken.access_token });
+                    }else{
+                      console.log('error '+ err);
+                    }
+                  });
+               });
+            });
+    } else {
     // Step 3b. Create a new user account or return an existing one.
     console.log('inside of the else');
     var params = {
@@ -232,8 +232,10 @@
 
       console.log('this is the token: '+ _theToken);
       var getFacebookGraphData = function(theData,  _theToken){
+        console.log('llego con estos datos: '+ theData + ' y token: ', _theToken);
         theData = theData || '257373200968071/feed';
         _theToken = _theToken || {access_token: fbToken};
+        console.log('se intentara con estos datos: '+ theData + ' y token: ', _theToken, ' el token deberia ser: ', fbToken);
 
         graph.getAsync(theData, _theToken)
     .then(function(res){
@@ -264,7 +266,7 @@
       };
 
       console.log('llamando a la funcion');
-      getFacebookGraphData();
+       getFacebookGraphData();
     });
 
 
